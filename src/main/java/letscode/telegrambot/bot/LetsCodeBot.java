@@ -52,7 +52,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             try {
                 resultMessage = (Message) execute(message);
             } catch (TelegramApiException e) {
-                log.error("Some shit happens during message sending :(", e);
+ //               log.error("Some shit happens during message sending :(", e);
             }
 
             if (isIncoming) {

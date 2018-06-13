@@ -20,4 +20,47 @@ public class BotMessage {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "answer_for_id")
     private BotMessage answerFor;
+
+    public BotMessage() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public BotChat getChat() {
+        return chat;
+    }
+
+    public void setChat(BotChat chat) {
+        this.chat = chat;
+    }
+
+    public BotUser getFrom() {
+        return from;
+    }
+
+    public void setFrom(BotUser from) {
+        this.from = from;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public BotMessage getAnswerFor() {
+        return answerFor;
+    }
+
+    public void setAnswerFor(BotMessage answerFor) {
+        this.answerFor = answerFor;
+    }
 }
