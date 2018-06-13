@@ -1,5 +1,7 @@
 package letscode.telegrambot.service;
 
+import letscode.telegrambot.bot.LetsCodeBot;
+import letscode.telegrambot.config.KeyboardReply;
 import letscode.telegrambot.domain.BotChat;
 import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.BotUser;
@@ -8,16 +10,21 @@ import letscode.telegrambot.repo.MessageRepo;
 import letscode.telegrambot.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 
+import java.util.List;
+
 @Service
 public class MessageService {
+
     private final ChatService chatService;
     private final UserService userService;
     private final MessageRepo messageRepo;
     private final ChatRepo chatRepo;
     private final UserRepo userRepo;
+
 
     @Autowired
     public MessageService(
@@ -34,10 +41,25 @@ public class MessageService {
         this.userRepo = userRepo;
     }
 
+
     public BotMessage saveIncoming(Message message) {
         BotMessage botMessage = getBotMessage(message);
+        boolean isReply = message.getReplyToMessage()!=null;
+        if (!isReply) {
+            botMessage.setText("Вопрос #"+botMessage.getId()+": "+message.getText().substring(1));
+        } else {
+            Integer messageId = extractId(message.getText());
+            botMessage.setAnswerFor(messageRepo.findById(messageId));
+        }
 
         return messageRepo.save(botMessage);
+    }
+
+    private Integer extractId(String text) {
+        String idT = text.substring(text.indexOf("#")+1,
+                        text.indexOf(":"));
+        int id = Integer.parseInt(idT);
+        return id;
     }
 
     private BotMessage getBotMessage(Message message) {
@@ -74,4 +96,5 @@ public class MessageService {
 
         return messageRepo.save(answer);
     }
+
 }
