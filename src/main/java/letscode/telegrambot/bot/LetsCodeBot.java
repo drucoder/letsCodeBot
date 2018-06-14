@@ -79,7 +79,9 @@ public class LetsCodeBot extends TelegramLongPollingBot {
                 send(createMessage(receiveMessage,"Ваш вопрос был сохранён, вы можете его найти в разделе мои вопросы."));
 
             }
-
+            /*
+            Проверяем сообщение, является ли оно ответом
+             */
             boolean isAnswer = (receiveMessage.getReplyToMessage()!=null);
             if (isAnswer) {
                 messageService.saveIncoming(receiveMessage);
@@ -92,7 +94,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
                     .setMessageId(botMessage.getId())
                     .setChatId(botMessage.getChat().getId())
                     .setText(botMessage.getText());
-        } else if (update.hasCallbackQuery()) {
+        } else if (update.hasCallbackQuery()) { //Проверяем является ли сообщение InlineKeyboardReply командой
 
             buttonService.getCall(update.getCallbackQuery());
         }

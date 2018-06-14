@@ -1,9 +1,5 @@
 package letscode.telegrambot.domain;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.xml.ws.soap.Addressing;
-
 /**
  * Список кнопок
  */
@@ -13,7 +9,12 @@ public enum Buttons {
     MY_QUESTIONS_LIST(1,"Мои вопросы📒"),
     QUESTIONS_LIST(2,"Список вопросов 📝"),
     HELP(3,"Помощь 💬"),
-    OPEN_QUESTIONS(4,"getQuest");
+    OPEN_QUESTIONS(4,"getQuest"),
+    SET_DONE(5,"setDone"),
+    GET_ANSWER_LIST(6,"getAnswerList"),
+    GET_ANSWER(7,"getAnswer"),
+    SET_LIKE(8,"setLike"),
+    SET_DISLIKE(9,"setDislike");
 
     private final int code;
     private final String buttonCommands;
