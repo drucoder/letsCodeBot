@@ -1,5 +1,6 @@
 package letscode.telegrambot.service;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
 import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.Buttons;
 import letscode.telegrambot.repo.MessageRepo;
