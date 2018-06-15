@@ -13,7 +13,6 @@ import java.util.List;
 
 @Component
 public class KeyboardReply {
-
     /**
      * Клавиатура с 4мя кнопками <ul>
      *     <li><b>База Ответов</b> - Выводит сообщением все закрытые вопросы пользователей</li>
@@ -66,6 +65,7 @@ public class KeyboardReply {
 
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton btn = new InlineKeyboardButton();
+
         if (!isAnswer) {
             InlineKeyboardButton button = btn.setText("Открыть вопрос").setCallbackData("getQuest");
             rowInline.add(button);
@@ -95,15 +95,13 @@ public class KeyboardReply {
                 InlineKeyboardButton btnDone = new InlineKeyboardButton();
                 InlineKeyboardButton buttonDone = btnDone.setText("Закрыть вопрос").setCallbackData("setDone");
                 rowInline.add(buttonDone);
-
-            }
+                }
 
             if (enableAnswer) {
                 InlineKeyboardButton btnListAnswer = new InlineKeyboardButton();
                 InlineKeyboardButton buttonAnswerList = btnListAnswer.setText("Ответы").setCallbackData("getAnswerList");
                 rowInline.add(buttonAnswerList);
-
-            }
+                }
 
         if (isAnswer) {
             InlineKeyboardButton btnLike = new InlineKeyboardButton();
@@ -112,11 +110,10 @@ public class KeyboardReply {
             InlineKeyboardButton btnDislike = new InlineKeyboardButton();
             InlineKeyboardButton buttonDisLike = btnDislike.setText("👎").setCallbackData("setDislike");
             rowInline.add(buttonDisLike);
+            }
 
-        }
         rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         sendMessage.setReplyMarkup(markupInline);
-
-    }
+        }
 }

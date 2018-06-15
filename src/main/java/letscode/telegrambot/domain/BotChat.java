@@ -17,5 +17,4 @@ public class BotChat {
     private String firstName;
     private String lastName;
     private String userName;
-
 }

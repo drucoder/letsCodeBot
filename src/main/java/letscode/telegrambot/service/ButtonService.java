@@ -3,11 +3,10 @@ package letscode.telegrambot.service;
 import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.Buttons;
 import letscode.telegrambot.repo.MessageRepo;
-import letscode.telegrambot.utils.MessageBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.Update;
 
 import java.util.List;
 
@@ -19,95 +18,115 @@ import java.util.List;
 @Service
 public class ButtonService {
 
-    @Autowired
-    private MessageRepo messageRepo;
+    private final MessageRepo messageRepo;
+    private final MessageService messageService;
+    private final SendService sendService;
 
     @Autowired
-    private MessageService messageService;
-
-    private boolean isAnswer;
+    public ButtonService(MessageRepo messageRepo,
+                         MessageService messageService,
+                         SendService sendService) {
+        this.messageRepo = messageRepo;
+        this.messageService = messageService;
+        this.sendService = sendService;
+    }
 
     /**
-     * Отрабатываем команды кнопок меню
-     * @param message - принятое сообщение из чата
-     * @param text - текст( команда из чата)
+     * Объеденил 2 метода getData и getCall в один <code>executeCommand(Update)</code>
+     * Метод принимает update из чата, определяет его является ли update обычным сообщением или CallBackQuery
+     * распарсивает update на (Message) message и (String) receiveCommand. Дальше находит свой case и выполняет метод,
+     * еще мне не нравилось уведомление Идеи о том что может выхватиться NULL, поставил предварительную проверку на NULL,
+     * хотя на Null есть проверка в LetsCodeBot. ;)
+     * @param update - принимаемый update из чата
      */
-    public void getData(Message message, String text) {
+    public void executeCommand(Update update) {
 
-        Buttons button = Buttons.get(text);
-        MessageBuilder messageBuilder = new MessageBuilder();
-
-        switch (button) {
-            case HELP:
-
-                break;
-            case QUESTIONS_LIST:
-                isAnswer = false;
-                List<BotMessage> botMessageList = messageRepo.findAllByDoneIsFalseAndAnswerForNull();
-                messageBuilder.createMessageList(message,botMessageList,isAnswer);
-                break;
-            case MY_QUESTIONS_LIST:
-                break;
-            case KNOWLEDGE_BASE:
-                break;
-
-        }
-
-    }
-
-    public void getCall(CallbackQuery callbackQuery) {
-        Buttons button = Buttons.get(callbackQuery.getData());
-        MessageBuilder messageBuilder = new MessageBuilder();
+        String receiveCommand;
+        Message message;
         BotMessage botMessage;
 
-        switch (button) {
-            case OPEN_QUESTIONS:    //Обрабатываем callBackQuerry - getQuest
-                isAnswer = false;
-                botMessage = messageRepo.findById(   //находим вопрос по id из callBackQuerry.getMessage.getText()
-                        extractId(
-                                callbackQuery
-                                        .getMessage()
-                                        .getText()
-                        )
-                );
+        if (update.getCallbackQuery()!=null) {      //проверяем содержит ли update в себе CallbackQuery()
+            receiveCommand = update.getCallbackQuery().getData();   // получаем команду отправленную через CallbackQuery()
+            message = update.getCallbackQuery().getMessage();   //получаем сообщение отправленное через CallbackQuery()
+        } else {
+            receiveCommand = update.getMessage().getText(); //простое распарсивание команды из чата
+            message = update.getMessage();                  //и сообщения
+        }
 
-                long count = messageRepo.countAllByAnswerFor(botMessage);    //счетчик ответов.
-                messageBuilder.detailedQuestions(botMessage, callbackQuery, count,isAnswer); //
-                break;
-            case SET_DONE:
-                messageService.setDone(callbackQuery);
-                messageBuilder.createDynamicMessage(callbackQuery,"Ваш вопрос закрыт, не забудьте отблагадорить тех, кто принимал участие в решении вашей проблемы");
-                break;
-            case GET_ANSWER_LIST:
-                isAnswer = true;
-                List<BotMessage> answerList = messageRepo
-                        .findAllByAnswerFor(messageRepo
-                                .findById(
-                                        extractId(
-                                            callbackQuery
-                                                .getMessage()
-                                                .getText())
-                                )
-                        );
-                messageBuilder.createMessageList(callbackQuery.getMessage(),answerList,isAnswer);
-                break;
-            case GET_ANSWER:
-                isAnswer = true;
-                botMessage = messageRepo.findById(   //находим вопрос по id из callBackQuerry.getMessage.getText()
-                        extractId(
-                                callbackQuery
-                                        .getMessage()
-                                        .getText()
-                        )
-                );
-                messageBuilder.detailedQuestions(botMessage,callbackQuery,0, isAnswer);
+        Buttons button = Buttons.get(receiveCommand);
 
+        if (button != null) {
+            switch (button) {
+
+                case HELP:
+                    //TODO: FAQ по боту.
+                    break;
+
+                case QUESTIONS_LIST:
+                    boolean isAnswer = false;
+                    List<BotMessage> botMessageList = messageRepo.findAllByDoneIsFalseAndAnswerForNull();   //находим все сообщения ByDoneIsFalseAndAnswerForNull()
+                    sendService.sendMessageList(message,botMessageList, isAnswer);
+                    break;
+
+                case MY_QUESTIONS_LIST:
+                    //TODO: Список вопросов пользователя
+                    break;
+
+                case KNOWLEDGE_BASE:
+                    //TODO: База знаний
+                    break;
+
+                case OPEN_QUESTIONS:    //Обрабатываем callBackQuerry - getQuest
+                    isAnswer = false;
+                    botMessage = messageRepo.findById(   //находим вопрос по id из callBackQuerry.getMessage.getText()
+                            extractId(message.getText())
+                    );
+    
+                    long count = messageRepo.countAllByAnswerFor(botMessage);    //счетчик ответов.
+                    sendService.openMessage(botMessage, update.getCallbackQuery(), count, isAnswer);
+                    break;
+    
+                case SET_DONE:
+                    messageService.setDone(messageRepo.findById(
+                            extractId(message.getText())
+                    ));
+                    sendService.sendMessage(message,
+                            "Ваш вопрос закрыт, не забудьте отблагадорить тех, кто принимал участие в решении вашей проблемы");
+                    break;
+    
+                case GET_ANSWER_LIST:
+                    isAnswer = true;
+                    List<BotMessage> answerList = messageRepo
+                            .findAllByAnswerFor(messageRepo
+                                    .findById(
+                                            extractId(
+                                                    message.getText()
+                                            )
+                                    )
+                            );
+                    sendService.sendMessageList(message, answerList, isAnswer);
+                    break;
+    
+                case GET_ANSWER:
+                    isAnswer = true;
+                    botMessage = messageRepo.findById(   //находим вопрос по id из callBackQuerry.getMessage.getText()
+                            extractId(
+                                    message.getText()
+                            )
+                    );
+                    sendService.openMessage(botMessage, update.getCallbackQuery(), 0, isAnswer);
+                    break;
+            }
         }
     }
 
+    /**
+     * Метод для извлечения id из текста
+     * @param text принимаемый текст
+     * @return - возвращаем Long
+     */
     private int extractId(String text) {
-        int id = Integer.parseInt(text.substring(text.indexOf("#")+1,
+        return Integer.parseInt(text.substring(text.indexOf("#") + 1,
                 text.indexOf(":")));
-        return id;
     }
 }

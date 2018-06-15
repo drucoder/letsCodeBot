@@ -16,5 +16,4 @@ public class BotUser {
     private Boolean isBot;
     private String lastName;
     private String userName;
-
 }

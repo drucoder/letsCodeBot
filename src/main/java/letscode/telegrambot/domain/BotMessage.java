@@ -21,5 +21,4 @@ public class BotMessage {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "answer_for_id")
     private BotMessage answerFor;
-
 }
