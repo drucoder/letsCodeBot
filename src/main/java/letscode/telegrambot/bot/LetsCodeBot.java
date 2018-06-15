@@ -5,6 +5,7 @@ import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.Buttons;
 import letscode.telegrambot.service.ButtonService;
 import letscode.telegrambot.service.MessageService;
+import letscode.telegrambot.service.SendService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,39 +17,32 @@ import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-import java.util.List;
 
-/**
- * TODO: Бот сохраняет в Базу не только сообщение пользователя но и своё сообщение!?
- */
 @Component
 @Slf4j
 public class LetsCodeBot extends TelegramLongPollingBot {
     private static final String BOT_TOKEN = "BOT_TOKEN";
     private static final String BOT_NAME = "BOT_NAME";
 
-    private MessageService messageService;
-    private KeyboardReply keyboardReply;
-    private ButtonService buttonService;
+    private final MessageService messageService;
+    private final KeyboardReply keyboardReply;
+    private final ButtonService buttonService;
+    private final SendService sendService;
 
     @Autowired
     public LetsCodeBot(MessageService messageService,
                        KeyboardReply keyboardReply,
-                       ButtonService buttonService) {
+                       ButtonService buttonService,
+                       SendService sendService) {
         this.messageService = messageService;
         this.keyboardReply = keyboardReply;
         this.buttonService = buttonService;
+        this.sendService = sendService;
     }
-
-    public LetsCodeBot() {
-
-    }
-
 
     public void onUpdateReceived(Update update) {
         BotApiMethod message = null;
         BotMessage botMessage = null;
-        SendMessage sendMessage = null;
 
         boolean isIncoming = update.hasMessage() && update.getMessage().hasText();
 
@@ -57,31 +51,28 @@ public class LetsCodeBot extends TelegramLongPollingBot {
 
             boolean isStarting = receiveMessage.getText().toLowerCase().equals("/start");
             if (isStarting) {
-
-                send(createMessage(receiveMessage, "Привет, " + receiveMessage.getFrom().getFirstName() + "!!!"));
+                send(sendService.createMessageBody(receiveMessage,
+                        "Привет, " + receiveMessage.getFrom().getFirstName() + "!!!"));
             }
             /*
             Проверяем приходящее сообщение является ли это командой с кнопки.
              */
-            boolean isBottomButtonsPressed = Buttons.get(receiveMessage.getText())!=null && !update.hasCallbackQuery();
+            boolean isBottomButtonsPressed = Buttons.get(receiveMessage.getText())!=null
+                    && !update.hasCallbackQuery();
 
             if (isBottomButtonsPressed) {
-                buttonService.getData(receiveMessage, receiveMessage.getText());
+                buttonService.executeCommand(update);
             }
 
-            /*
-            Проверяем является ли сообщение вопросом для сохранения в базу.
-             */
-            boolean isQuestions = receiveMessage.getText().substring(0,1).equals("?");
+            boolean isQuestions = receiveMessage.getText().substring(0,1).equals("?"); //Проверка вопроса на сохранение в БД
 
             if (isQuestions) {
                 messageService.saveIncoming(receiveMessage);
-                send(createMessage(receiveMessage,"Ваш вопрос был сохранён, вы можете его найти в разделе мои вопросы."));
+                send(sendService
+                        .createMessageBody(receiveMessage,
+                                "Ваш вопрос был сохранён, вы можете его найти в разделе мои вопросы."));
+                }
 
-            }
-            /*
-            Проверяем сообщение, является ли оно ответом
-             */
             boolean isAnswer = (receiveMessage.getReplyToMessage()!=null);
             if (isAnswer) {
                 messageService.saveIncoming(receiveMessage);
@@ -96,9 +87,8 @@ public class LetsCodeBot extends TelegramLongPollingBot {
                     .setText(botMessage.getText());
         } else if (update.hasCallbackQuery()) { //Проверяем является ли сообщение InlineKeyboardReply командой
 
-            buttonService.getCall(update.getCallbackQuery());
+            buttonService.executeCommand(update);
         }
-
 
         if (message != null) {
             Message resultMessage = null;
@@ -115,17 +105,6 @@ public class LetsCodeBot extends TelegramLongPollingBot {
         }
     }
 
-    private SendMessage createMessage(Message receiveMessage, String botMessage) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(receiveMessage.getChatId());
-        if (!botMessage.isEmpty()) {
-            sendMessage.setText(botMessage);
-        } else {
-            sendMessage.setText(receiveMessage.getText());
-        }
-        keyboardReply.setBottomButtons(sendMessage);
-        return sendMessage;
-    }
 
     /**
      * Отправляем сообщения
@@ -139,7 +118,6 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             log.error("Some shit happens during message sending :(", e);
         }
     }
-
 
     public String getBotUsername() {
         return System.getenv(BOT_NAME);
