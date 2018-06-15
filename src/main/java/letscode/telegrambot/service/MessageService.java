@@ -61,7 +61,7 @@ public class MessageService {
         } else {    //если сообщение getReplyToMessage()
             try {
                 Integer messageId = extractId(message.getReplyToMessage().getText()); // извлекаем id сообщения из текста
-                botMessage.setAnswerFor(messageRepo.findById(messageId)); // устанавливаем сообщению перед сохранением в AnswerFor сообщение найденное по ID.
+                botMessage.setAnswerFor(messageRepo.findById((long)messageId).get()); // устанавливаем сообщению перед сохранением в AnswerFor сообщение найденное по ID.
                 sendService.sendMessage(message,"Спасибо за ответ, возможно автору это поможет.");
             } catch (Exception ex) {    //таким способом сделал проверку на парсинг числа из текста, и нахождение сообщения в базе
                 //хз что сюда ставить, впринципе обработка exception в случае нахождения тут не особо нужна.
@@ -79,7 +79,7 @@ public class MessageService {
 
         BotMessage botMessage = new BotMessage();
 
-        botMessage.setId(message.getMessageId());
+        botMessage.setId(Long.valueOf(message.getMessageId()));
         botMessage.setText(message.getText());
         botMessage.setChat(botChat);
         botMessage.setFrom(botUser);

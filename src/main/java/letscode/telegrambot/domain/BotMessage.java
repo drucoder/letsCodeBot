@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Data
 public class BotMessage {
     @Id
-    private Integer id;
+    private Long id;
     @ManyToOne
     private BotChat chat;
     @ManyToOne
