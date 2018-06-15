@@ -82,7 +82,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             botMessage = messageService.updateMessageText(update);
 
             message = new EditMessageText()
-                    .setMessageId(botMessage.getId())
+                    .setMessageId(Math.toIntExact(botMessage.getId()))
                     .setChatId(botMessage.getChat().getId())
                     .setText(botMessage.getText());
         } else if (update.hasCallbackQuery()) { //Проверяем является ли сообщение InlineKeyboardReply командой

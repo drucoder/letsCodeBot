@@ -1,6 +1,7 @@
 package letscode.telegrambot.repo;
 
 import letscode.telegrambot.domain.BotMessage;
+import letscode.telegrambot.domain.BotUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,12 +14,6 @@ public interface MessageRepo extends JpaRepository<BotMessage, Long> {
      * @return - возвращает BotMessage
      */
     BotMessage findByAnswerForId(Integer messageId);
-
-    /**Тупой поиск сообщения по ID
-     * @param messageId - ID запрашиваемого сообщения
-     * @return - возвращает запись из бд с соответственным ID
-     */
-    BotMessage findById(Integer messageId);
 
     /**Список сообщений у которых статус выполнения false, и AnswerFor = null,
      * для поиска всех не закрытых вопросов
@@ -41,4 +36,10 @@ public interface MessageRepo extends JpaRepository<BotMessage, Long> {
      */
     List<BotMessage> findAllByAnswerFor(BotMessage botMessage);
 
+    /**
+     * Поиск всех вопросов заданных пользователем
+     * @param botUser - пользователь.
+     * @return - возвращает список сообщений
+     */
+    List<BotMessage> findAllByFromIsAndDoneIsFalse(BotUser botUser);
 }
