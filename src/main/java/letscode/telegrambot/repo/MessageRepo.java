@@ -42,4 +42,10 @@ public interface MessageRepo extends JpaRepository<BotMessage, Long> {
      * @return - возвращает список сообщений
      */
     List<BotMessage> findAllByFromIsAndDoneIsFalse(BotUser botUser);
+
+    /**
+     * Поиск всех решённых(закрытых) вопросов
+     * @return  - возвращает список сообщений.
+     */
+    List<BotMessage> findAllByDoneIsTrue();
 }

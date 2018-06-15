@@ -61,7 +61,6 @@ public class ButtonService {
 
         Buttons button = Buttons.get(receiveCommand);
         Optional<BotMessage> botMessage;
-        BotUser botUser = new BotUser();
         if (button != null) {
             switch (button) {
 
@@ -72,7 +71,11 @@ public class ButtonService {
                 case QUESTIONS_LIST:    // Список всех вопросов
                     boolean isAnswer = false;
                     List<BotMessage> botMessageList = messageRepo.findAllByDoneIsFalseAndAnswerForNull();   //находим все сообщения ByDoneIsFalseAndAnswerForNull()
-                    sendService.sendMessageList(message, botMessageList, isAnswer);
+                    if (botMessageList.isEmpty()) {
+                        sendService.sendMessage(message,"Не решённых вопрос нет.");
+                    } else {
+                        sendService.sendMessageList(message, botMessageList, isAnswer);
+                    }
                     break;
 
                 case MY_QUESTIONS_LIST: // Список вопросов пользователя
@@ -86,8 +89,9 @@ public class ButtonService {
                     }
                     break;
 
-                case KNOWLEDGE_BASE:
-                    //TODO: База знаний
+                case KNOWLEDGE_BASE: // Список всех решённых вопросов.
+                    List<BotMessage> messageList = messageRepo.findAllByDoneIsTrue();
+                    sendService.completeMessageList(message,messageList);
                     break;
 
                 case OPEN_QUESTIONS:    //Обрабатываем callBackQuerry - getQuest(Открыть вопрос)
@@ -102,10 +106,8 @@ public class ButtonService {
                 case SET_DONE:  //Обрабатываем callBackQuerry - Устанавливаем статус решенный
                     messageService.setDone(
                             messageRepo.findById(
-                                    extractId(
-                                            message.getText()
-                                    )
-                            )
+                                    extractId(message.getText())
+                            ).get()
                     );
                     sendService.sendMessage(message,
                             "Ваш вопрос закрыт, не забудьте отблагадорить тех, " +

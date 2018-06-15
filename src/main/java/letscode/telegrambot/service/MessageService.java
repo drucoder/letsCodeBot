@@ -126,7 +126,4 @@ public class MessageService {
         return Integer.parseInt(idT);
     }
 
-    public void setDone(Optional<BotMessage> byId) {
-
-    }
 }
