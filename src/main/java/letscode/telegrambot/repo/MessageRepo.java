@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface MessageRepo extends JpaRepository<BotMessage, Long> {
+public interface MessageRepo extends JpaRepository<BotMessage, Integer> {
 
     /**
      * Метод ищет ответ по ID

@@ -140,8 +140,8 @@ public class ButtonService {
      * @param text принимаемый текст
      * @return - возвращаем Long
      */
-    private long extractId(String text) {
-        return Long.parseLong(text.substring(text.indexOf("#") + 1,
+    private Integer extractId(String text) {
+        return Integer.parseInt(text.substring(text.indexOf("#") + 1,
                 text.indexOf(":")));
     }
 }

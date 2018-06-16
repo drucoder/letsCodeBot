@@ -1,7 +1,5 @@
 package letscode.telegrambot.service;
 
-import letscode.telegrambot.bot.LetsCodeBot;
-import letscode.telegrambot.config.KeyboardReply;
 import letscode.telegrambot.domain.BotChat;
 import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.BotUser;
@@ -10,13 +8,8 @@ import letscode.telegrambot.repo.MessageRepo;
 import letscode.telegrambot.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MessageService {
@@ -61,7 +54,7 @@ public class MessageService {
         } else {    //если сообщение getReplyToMessage()
             try {
                 Integer messageId = extractId(message.getReplyToMessage().getText()); // извлекаем id сообщения из текста
-                botMessage.setAnswerFor(messageRepo.findById((long)messageId).get()); // устанавливаем сообщению перед сохранением в AnswerFor сообщение найденное по ID.
+                botMessage.setAnswerFor(messageRepo.findById(messageId).get()); // устанавливаем сообщению перед сохранением в AnswerFor сообщение найденное по ID.
                 sendService.sendMessage(message,"Спасибо за ответ, возможно автору это поможет.");
             } catch (Exception ex) {    //таким способом сделал проверку на парсинг числа из текста, и нахождение сообщения в базе
                 //хз что сюда ставить, впринципе обработка exception в случае нахождения тут не особо нужна.
@@ -79,7 +72,7 @@ public class MessageService {
 
         BotMessage botMessage = new BotMessage();
 
-        botMessage.setId(Long.valueOf(message.getMessageId()));
+        botMessage.setId(message.getMessageId());
         botMessage.setText(message.getText());
         botMessage.setChat(botChat);
         botMessage.setFrom(botUser);
