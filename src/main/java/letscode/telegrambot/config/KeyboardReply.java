@@ -84,14 +84,14 @@ public class KeyboardReply {
      * @param sendMessage - тело сообщения
      * @param isAuthor - если переменная true, то добавляет кнопку закрыть вопрос.
      * @param enableAnswer - если переменная true, добавляет кнопку посмотреть ответы на вопрос.
-     * @param isAnswer - если сообщение является ответом то добавляем кнопки Like-Dislike
+     * @param enableLikeDis - добавляем кнопки Like-Dislike
      */
-    public void addTwoLineKeyboard(SendMessage sendMessage, boolean isAuthor, boolean enableAnswer, boolean isAnswer) {
+    public void addTwoLineKeyboard(SendMessage sendMessage, boolean isAuthor, boolean enableAnswer, boolean enableLikeDis) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
-        if (isAuthor && !isAnswer) {
+        if (isAuthor && !enableLikeDis) {
                 InlineKeyboardButton btnDone = new InlineKeyboardButton();
                 InlineKeyboardButton buttonDone = btnDone.setText("Закрыть вопрос").setCallbackData("setDone");
                 rowInline.add(buttonDone);
@@ -103,7 +103,7 @@ public class KeyboardReply {
                 rowInline.add(buttonAnswerList);
                 }
 
-        if (isAnswer) {
+        if (enableLikeDis) {
             InlineKeyboardButton btnLike = new InlineKeyboardButton();
             InlineKeyboardButton buttonLike = btnLike.setText("👍").setCallbackData("setLike");
             rowInline.add(buttonLike);
@@ -116,4 +116,5 @@ public class KeyboardReply {
         markupInline.setKeyboard(rowsInline);
         sendMessage.setReplyMarkup(markupInline);
         }
+
 }

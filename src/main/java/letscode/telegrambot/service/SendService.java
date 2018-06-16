@@ -3,6 +3,7 @@ package letscode.telegrambot.service;
 import letscode.telegrambot.bot.LetsCodeBot;
 import letscode.telegrambot.config.KeyboardReply;
 import letscode.telegrambot.domain.BotMessage;
+import letscode.telegrambot.repo.MessageRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -19,12 +20,15 @@ public class SendService {
 
     private final KeyboardReply keyboardReply;
     private final LetsCodeBot letsCodeBot;
+    private final MessageRepo messageRepo;
 
     @Autowired
-    public SendService(KeyboardReply keyboardReply,
-                       @Lazy LetsCodeBot letsCodeBot) {
-        this.keyboardReply = keyboardReply;
+    public SendService(@Lazy LetsCodeBot letsCodeBot,
+                       KeyboardReply keyboardReply,
+                       MessageRepo messageRepo) {
         this.letsCodeBot = letsCodeBot;
+        this.keyboardReply = keyboardReply;
+        this.messageRepo = messageRepo;
     }
 
     /**
@@ -133,5 +137,37 @@ public class SendService {
         SendMessage sendMessage = createMessageBody(callbackQuery.getMessage(),botText);
         keyboardReply.addTwoLineKeyboard(sendMessage, isAuthor, enableAnswer, isAnswer);  //собираем клавиатуру
         letsCodeBot.send(sendMessage);
+    }
+
+    /**
+     * Метод создает сообщении с решёнными вопросами. И тремя кнопками. посмотреть ответ, лайк, диз.
+     * @param receiveMessage - сообщение из чата
+     * @param messageList - список решённых сообщений
+     */
+    public void completeMessageList(Message receiveMessage,
+                             List<BotMessage> messageList) {
+        String title, body, footer;
+
+        for (BotMessage botMessage: messageList) {
+
+            long count = messageRepo.countAllByAnswerFor(botMessage);   // считаем сколько ответов на этот вопрос.
+            if (count>0) {  //отображаем только закрытые с ответами
+
+                title = "<b>Вопрос #" + botMessage.getId() + ":</b>\n"; //шапка сообщения
+                body = "<code>" + botMessage.getText() + "</code>\n";   //тело
+                footer = "<em>Автор вопроса: " + botMessage.getFrom().getUserName() + "</em>\n" +
+                        "<em>Ответов: " + count + "</em>\n";    //нижняя часть
+
+                //TODO придумать разделители между шапкой, телом и низом
+                SendMessage sendMessage = createMessageBody(receiveMessage,
+                        title + body + footer); //создаем тело сообщения
+                keyboardReply.addTwoLineKeyboard(   //собираем клавиатуру
+                        sendMessage,
+                        false,              //ставит кнопку закрыть вопрос(false) потому что в нашем случае это не надо
+                        true,           //создает кнопку список ответов(true)
+                        true);              //Используем для установки лайков
+                letsCodeBot.send(sendMessage);
+            }
+        }
     }
 }
