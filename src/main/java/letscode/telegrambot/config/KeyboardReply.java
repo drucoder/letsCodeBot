@@ -15,10 +15,10 @@ import java.util.List;
 public class KeyboardReply {
     /**
      * Клавиатура с 4мя кнопками <ul>
-     *     <li><b>База Ответов</b> - Выводит сообщением все закрытые вопросы пользователей</li>
-     *     <li><b>Мои вопросы</b> - Выводит сообщениями все вопросы текущего пользователя</li>
-     *     <li><b>Список вопросов</b> - Выводит сообщениеми все открытые вопросы пользователей</li>
-     *     <li><b>Помощь</b> - FAQ</li>
+     * <li><b>База Ответов</b> - Выводит сообщением все закрытые вопросы пользователей</li>
+     * <li><b>Мои вопросы</b> - Выводит сообщениями все вопросы текущего пользователя</li>
+     * <li><b>Список вопросов</b> - Выводит сообщениеми все открытые вопросы пользователей</li>
+     * <li><b>Помощь</b> - FAQ</li>
      * </ul>
      *
      * @param sendMessage - <code>SendMessage sendMessage</code> добавляем в sendMessage клавиатуру
@@ -55,9 +55,10 @@ public class KeyboardReply {
     /**
      * Метод устанавливает в SendMessage <code>sendMessage.setReplyMarkup(markupInline);</code>
      * кнопки в теле сообщения формирует за счет переменной isAnswer
+     *
      * @param sendMessage - тело сообщения
-     * @param isAnswer - булевая переменная от которой зависит какая будет кнопка "Открыть ответ" - true
-     *                 "Открыть вопрос" - false.
+     * @param isAnswer    - булевая переменная от которой зависит какая будет кнопка "Открыть ответ" - true
+     *                    "Открыть вопрос" - false.
      */
     public void addOpenButton(SendMessage sendMessage, boolean isAnswer) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -81,9 +82,10 @@ public class KeyboardReply {
 
     /**
      * Метод создает клавиатуру для просмотра вопроса.
-     * @param sendMessage - тело сообщения
-     * @param isAuthor - если переменная true, то добавляет кнопку закрыть вопрос.
-     * @param enableAnswer - если переменная true, добавляет кнопку посмотреть ответы на вопрос.
+     *
+     * @param sendMessage   - тело сообщения
+     * @param isAuthor      - если переменная true, то добавляет кнопку закрыть вопрос.
+     * @param enableAnswer  - если переменная true, добавляет кнопку посмотреть ответы на вопрос.
      * @param enableLikeDis - добавляем кнопки Like-Dislike
      */
     public void addTwoLineKeyboard(SendMessage sendMessage, boolean isAuthor, boolean enableAnswer, boolean enableLikeDis) {
@@ -92,16 +94,16 @@ public class KeyboardReply {
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
         if (isAuthor && !enableLikeDis) {
-                InlineKeyboardButton btnDone = new InlineKeyboardButton();
-                InlineKeyboardButton buttonDone = btnDone.setText("Закрыть вопрос").setCallbackData("setDone");
-                rowInline.add(buttonDone);
-                }
+            InlineKeyboardButton btnDone = new InlineKeyboardButton();
+            InlineKeyboardButton buttonDone = btnDone.setText("Закрыть вопрос").setCallbackData("setDone");
+            rowInline.add(buttonDone);
+        }
 
-            if (enableAnswer) {
-                InlineKeyboardButton btnListAnswer = new InlineKeyboardButton();
-                InlineKeyboardButton buttonAnswerList = btnListAnswer.setText("Ответы").setCallbackData("getAnswerList");
-                rowInline.add(buttonAnswerList);
-                }
+        if (enableAnswer) {
+            InlineKeyboardButton btnListAnswer = new InlineKeyboardButton();
+            InlineKeyboardButton buttonAnswerList = btnListAnswer.setText("Ответы").setCallbackData("getAnswerList");
+            rowInline.add(buttonAnswerList);
+        }
 
         if (enableLikeDis) {
             InlineKeyboardButton btnLike = new InlineKeyboardButton();
@@ -110,11 +112,11 @@ public class KeyboardReply {
             InlineKeyboardButton btnDislike = new InlineKeyboardButton();
             InlineKeyboardButton buttonDisLike = btnDislike.setText("👎").setCallbackData("setDislike");
             rowInline.add(buttonDisLike);
-            }
+        }
 
         rowsInline.add(rowInline);
         markupInline.setKeyboard(rowsInline);
         sendMessage.setReplyMarkup(markupInline);
-        }
+    }
 
 }

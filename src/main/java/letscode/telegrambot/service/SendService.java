@@ -33,8 +33,9 @@ public class SendService {
 
     /**
      * Метод создает тело сообщения
+     *
      * @param receiveMessage - принятое сообщение из чата, для извлечения ID
-     * @param botMessage - Текст ответа от бота
+     * @param botMessage     - Текст ответа от бота
      * @return - тело сообщения.
      */
     public SendMessage createMessageBody(Message receiveMessage, String botMessage) {
@@ -52,25 +53,27 @@ public class SendService {
 
     /**
      * Метод отправляет сообщение в чат
+     *
      * @param receiveMessage - принятое сообщение из чата
-     * @param botText - текст ответа бота.
+     * @param botText        - текст ответа бота.
      */
     public void sendMessage(Message receiveMessage, String botText) {
-        letsCodeBot.send(createMessageBody(receiveMessage,botText));
+        letsCodeBot.send(createMessageBody(receiveMessage, botText));
     }
 
     /**
      * Метод создает сообщения списком.
+     *
      * @param receiveMessage - принятое сообщение из чата для распарсивания
      * @param botMessageList - список сообщений
-     * @param isAnswer - так как этот метод используется для вывода сообщений вопросов и ответов,
-     *                 то при формировании шапки, и кнопок используется эта булевая переменная
+     * @param isAnswer       - так как этот метод используется для вывода сообщений вопросов и ответов,
+     *                       то при формировании шапки, и кнопок используется эта булевая переменная
      */
     public void sendMessageList
     (Message receiveMessage, List<BotMessage> botMessageList, boolean isAnswer) {
         String getText, title, botText;
 
-        for (BotMessage botMessage:botMessageList) {        //пробегаемся по списку botMessageList
+        for (BotMessage botMessage : botMessageList) {        //пробегаемся по списку botMessageList
 
             if (botMessage.getText().length() > 50) {       // если сообщение длиннее 50 символов режем его
                 getText = botMessage.getText().substring(0, 50);
@@ -79,26 +82,27 @@ public class SendService {
             }
 
             if (!isAnswer) {                                        //определяем, вопрос это или ответ.
-                title = "<b>Вопрос #"+botMessage.getId()+":</b>\n"; //шапка для вопроса
+                title = "<b>Вопрос #" + botMessage.getId() + ":</b>\n"; //шапка для вопроса
             } else {
-                title = "<b>Ответ #"+botMessage.getId()+":</b>\n";  //шапка для ответа.
+                title = "<b>Ответ #" + botMessage.getId() + ":</b>\n";  //шапка для ответа.
             }
 
             botText = title +
-                    "<code>"+getText+"</code>\n" +
-                    "<b>Автор: "+botMessage.getFrom().getUserName()+"</b>";
+                    "<code>" + getText + "</code>\n" +
+                    "<b>Автор: " + botMessage.getFrom().getUserName() + "</b>";
 
-            SendMessage sendMessage = createMessageBody(receiveMessage,botText);
-            keyboardReply.addOpenButton(sendMessage,isAnswer);
+            SendMessage sendMessage = createMessageBody(receiveMessage, botText);
+            keyboardReply.addOpenButton(sendMessage, isAnswer);
             letsCodeBot.send(sendMessage);
         }
     }
 
     /**
      * Метод отображает вопрос полностью.
-     * @param botMessage - вопрос из БД
+     *
+     * @param botMessage    - вопрос из БД
      * @param callbackQuery - перехваченный update из чата, который приходит в случае нажатия InlineKeyboardReply
-     * @param count - счетчик ответов.
+     * @param count         - счетчик ответов.
      * @param isAnswer
      */
     public void openMessage(
@@ -134,24 +138,25 @@ public class SendService {
                     "<b>Автор: " + botMessage.getFrom().getUserName() + "</b>";
         }
 
-        SendMessage sendMessage = createMessageBody(callbackQuery.getMessage(),botText);
+        SendMessage sendMessage = createMessageBody(callbackQuery.getMessage(), botText);
         keyboardReply.addTwoLineKeyboard(sendMessage, isAuthor, enableAnswer, isAnswer);  //собираем клавиатуру
         letsCodeBot.send(sendMessage);
     }
 
     /**
      * Метод создает сообщении с решёнными вопросами. И тремя кнопками. посмотреть ответ, лайк, диз.
+     *
      * @param receiveMessage - сообщение из чата
-     * @param messageList - список решённых сообщений
+     * @param messageList    - список решённых сообщений
      */
     public void completeMessageList(Message receiveMessage,
-                             List<BotMessage> messageList) {
+                                    List<BotMessage> messageList) {
         String title, body, footer;
 
-        for (BotMessage botMessage: messageList) {
+        for (BotMessage botMessage : messageList) {
 
             long count = messageRepo.countAllByAnswerFor(botMessage);   // считаем сколько ответов на этот вопрос.
-            if (count>0) {  //отображаем только закрытые с ответами
+            if (count > 0) {  //отображаем только закрытые с ответами
 
                 title = "<b>Вопрос #" + botMessage.getId() + ":</b>\n"; //шапка сообщения
                 body = "<code>" + botMessage.getText() + "</code>\n";   //тело

@@ -10,19 +10,23 @@ public interface MessageRepo extends JpaRepository<BotMessage, Integer> {
 
     /**
      * Метод ищет ответ по ID
+     *
      * @param messageId - Integer id - ответа который мы ищем.
      * @return - возвращает BotMessage
      */
     BotMessage findByAnswerForId(Integer messageId);
 
-    /**Список сообщений у которых статус выполнения false, и AnswerFor = null,
+    /**
+     * Список сообщений у которых статус выполнения false, и AnswerFor = null,
      * для поиска всех не закрытых вопросов
+     *
      * @return
      */
     List<BotMessage> findAllByDoneIsFalseAndAnswerForNull();
 
     /**
      * Счетчик Оветов
+     *
      * @param botMessage - принимает сообщение и ищет все сообщения в базе у которых колонка
      *                   AnswerFor == botMessage
      * @return возвращает long
@@ -31,6 +35,7 @@ public interface MessageRepo extends JpaRepository<BotMessage, Integer> {
 
     /**
      * Поиск всех ответов
+     *
      * @param botMessage - Ищет все сообщения в которых колонка AnswerFor == botMessage
      * @return - возвращает список сообщений.
      */
@@ -38,6 +43,7 @@ public interface MessageRepo extends JpaRepository<BotMessage, Integer> {
 
     /**
      * Поиск всех вопросов заданных пользователем
+     *
      * @param botUser - пользователь.
      * @return - возвращает список сообщений
      */
@@ -45,7 +51,8 @@ public interface MessageRepo extends JpaRepository<BotMessage, Integer> {
 
     /**
      * Поиск всех решённых(закрытых) вопросов
-     * @return  - возвращает список сообщений.
+     *
+     * @return - возвращает список сообщений.
      */
     List<BotMessage> findAllByDoneIsTrue();
 }

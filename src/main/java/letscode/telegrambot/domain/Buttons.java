@@ -20,7 +20,7 @@ public enum Buttons {
 
 
     public static Buttons get(String buttonComands) {
-        for (Buttons c: Buttons.values()) {
+        for (Buttons c : Buttons.values()) {
             if (buttonComands.equals(c.getButtonCommands())) {
                 return c;
             }
@@ -30,7 +30,7 @@ public enum Buttons {
 
     Buttons(String buttonCommands) {
         this.buttonCommands = buttonCommands;
-        }
+    }
 
     public String getButtonCommands() {
         return buttonCommands;

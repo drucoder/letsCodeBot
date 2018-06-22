@@ -49,31 +49,33 @@ public class LetsCodeBot extends TelegramLongPollingBot {
         if (isIncoming) {
             Message receiveMessage = update.getMessage();
 
-            boolean isStarting = receiveMessage.getText().toLowerCase().equals("/start");
+            boolean isStarting = receiveMessage.getText()
+                    .toLowerCase()
+                    .equals("/start");
+
             if (isStarting) {
                 send(sendService.createMessageBody(receiveMessage,
                         "Привет, " + receiveMessage.getFrom().getFirstName() + "!!!"));
             }
-            /*
-            Проверяем приходящее сообщение является ли это командой с кнопки.
-             */
-            boolean isBottomButtonsPressed = Buttons.get(receiveMessage.getText())!=null
-                    && !update.hasCallbackQuery();
+
+            boolean isBottomButtonsPressed = Buttons    //Проверяем приходящее сообщение является ли это командой с кнопки.
+                    .get(receiveMessage.getText()) != null &&
+                    !update.hasCallbackQuery();
 
             if (isBottomButtonsPressed) {
                 buttonService.executeCommand(update);
             }
 
-            boolean isQuestions = receiveMessage.getText().substring(0,1).equals("?"); //Проверка вопроса на сохранение в БД
+            boolean isQuestions = receiveMessage.getText().startsWith("?"); //Проверка вопроса на сохранение в БД
 
             if (isQuestions) {
                 messageService.saveIncoming(receiveMessage);
                 send(sendService
                         .createMessageBody(receiveMessage,
                                 "Ваш вопрос был сохранён, вы можете его найти в разделе мои вопросы."));
-                }
+            }
 
-            boolean isAnswer = (receiveMessage.getReplyToMessage()!=null);
+            boolean isAnswer = (receiveMessage.getReplyToMessage() != null);
             if (isAnswer) {
                 messageService.saveIncoming(receiveMessage);
             }
@@ -96,7 +98,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             try {
                 resultMessage = (Message) execute(message);
             } catch (TelegramApiException e) {
-              log.error("Some shit happens during message sending :(", e);
+                log.error("Some shit happens during message sending :(", e);
             }
 
             if (isIncoming) {
@@ -108,6 +110,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
 
     /**
      * Отправляем сообщения
+     *
      * @param sendMessage
      */
     public void send(SendMessage sendMessage) {

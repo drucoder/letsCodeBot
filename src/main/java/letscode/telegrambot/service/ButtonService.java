@@ -65,14 +65,14 @@ public class ButtonService {
             switch (button) {
 
                 case HELP:
-                    sendService.sendMessage(message,"Привет, для того чтобы задать вопрос с сохранением в БД поставь перед вопросом <b>?</b>... ");
+                    sendService.sendMessage(message, "Привет, для того чтобы задать вопрос с сохранением в БД поставь перед вопросом <b>?</b>... ");
                     break;
 
                 case QUESTIONS_LIST:    // Список всех вопросов
                     boolean isAnswer = false;
                     List<BotMessage> botMessageList = messageRepo.findAllByDoneIsFalseAndAnswerForNull();   //находим все сообщения ByDoneIsFalseAndAnswerForNull()
                     if (botMessageList.isEmpty()) {
-                        sendService.sendMessage(message,"Не решённых вопрос нет.");
+                        sendService.sendMessage(message, "Не решённых вопрос нет.");
                     } else {
                         sendService.sendMessageList(message, botMessageList, isAnswer);
                     }
@@ -91,7 +91,7 @@ public class ButtonService {
 
                 case KNOWLEDGE_BASE: // Список всех решённых вопросов.
                     List<BotMessage> messageList = messageRepo.findAllByDoneIsTrue();
-                    sendService.completeMessageList(message,messageList);
+                    sendService.completeMessageList(message, messageList);
                     break;
 
                 case OPEN_QUESTIONS:    //Обрабатываем callBackQuerry - getQuest(Открыть вопрос)
