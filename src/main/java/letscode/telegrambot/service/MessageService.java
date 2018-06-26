@@ -13,11 +13,14 @@ import org.telegram.telegrambots.api.objects.Update;
 
 @Service
 public class MessageService {
+
     private final ChatService chatService;
     private final UserService userService;
     private final MessageRepo messageRepo;
     private final ChatRepo chatRepo;
     private final UserRepo userRepo;
+    private final SendService sendService;
+
 
     @Autowired
     public MessageService(
@@ -25,18 +28,39 @@ public class MessageService {
             UserService userService,
             MessageRepo messageRepo,
             ChatRepo chatRepo,
-            UserRepo userRepo
+            UserRepo userRepo,
+            SendService sendService
     ) {
         this.chatService = chatService;
         this.userService = userService;
         this.messageRepo = messageRepo;
         this.chatRepo = chatRepo;
         this.userRepo = userRepo;
+        this.sendService = sendService;
     }
 
+    /**
+     * Метод сохраняет сообщения в Базу, если сообщение было ответом на вопрос то сохраняет его как отввет
+     * в случае удачного нахождения id в тексте, и удачного нахождения сообщения с текущим id.
+     *
+     * @param message - принятое сообщение из чата
+     * @return - возвращает тупо запись в БД
+     */
     public BotMessage saveIncoming(Message message) {
         BotMessage botMessage = getBotMessage(message);
+        boolean isReply = message.getReplyToMessage() != null; // проверка Reply статус сообщения
 
+        if (!isReply) {
+            botMessage.setText(message.getText().substring(1)); // если сообщение не Ответ то записываем его как вопрос предварительно вырезав тэг знака вопроса
+        } else {    //если сообщение getReplyToMessage()
+            try {
+                Integer messageId = extractId(message.getReplyToMessage().getText()); // извлекаем id сообщения из текста
+                botMessage.setAnswerFor(messageRepo.findById(messageId).get()); // устанавливаем сообщению перед сохранением в AnswerFor сообщение найденное по ID.
+                sendService.sendMessage(message, "Спасибо за ответ, возможно автору это поможет.");
+            } catch (Exception ex) {    //таким способом сделал проверку на парсинг числа из текста, и нахождение сообщения в базе
+                //хз что сюда ставить, впринципе обработка exception в случае нахождения тут не особо нужна.
+            }
+        }
         return messageRepo.save(botMessage);
     }
 
@@ -74,4 +98,28 @@ public class MessageService {
 
         return messageRepo.save(answer);
     }
+
+    /**
+     * Устанавливаем статус done = true; чтобы отметить сообщение выполненным
+     *
+     * @param quest
+     */
+    public void setDone(BotMessage quest) {
+        quest.setDone(true);
+        messageRepo.save(quest);
+    }
+
+    /**
+     * Извлекаем id из текста и возвращаем его
+     *
+     * @param text - текст в котором ищем ID
+     * @return - возвращаем INTEGER
+     */
+    private Integer extractId(String text) {
+        String idT = text.substring(text.indexOf("#") + 1,
+                text.indexOf(":"));
+
+        return Integer.parseInt(idT);
+    }
+
 }
