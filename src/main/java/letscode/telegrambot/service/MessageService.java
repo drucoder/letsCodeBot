@@ -9,7 +9,11 @@ import letscode.telegrambot.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.PhotoSize;
 import org.telegram.telegrambots.api.objects.Update;
+
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class MessageService {
@@ -49,9 +53,20 @@ public class MessageService {
     public BotMessage saveIncoming(Message message) {
         BotMessage botMessage = getBotMessage(message);
         boolean isReply = message.getReplyToMessage() != null; // проверка Reply статус сообщения
+        boolean enableImage = message.getPhoto() != null; // проверяем есть ли изображение в вопросе
 
         if (!isReply) {
-            botMessage.setText(message.getText().substring(1)); // если сообщение не Ответ то записываем его как вопрос предварительно вырезав тэг знака вопроса
+            if (!enableImage) {
+                botMessage.setText(message.getText().substring(1)); // если сообщение не Ответ то записываем его как вопрос предварительно вырезав тэг знака вопроса
+            } else {    //Сохраняем в файл ID изображения если вопрос был с пикчей.
+                List<PhotoSize> photo = message.getPhoto();
+                String fileId = photo.stream()
+                        .sorted(Comparator.comparing(PhotoSize::getFileSize).reversed())
+                        .findFirst()
+                        .orElse(null).getFileId();
+                botMessage.setText(message.getText().substring(1));
+                botMessage.setFileId(fileId);
+            }
         } else {    //если сообщение getReplyToMessage()
             try {
                 Integer messageId = extractId(message.getReplyToMessage().getText()); // извлекаем id сообщения из текста

@@ -17,6 +17,7 @@ public class BotMessage {
     private BotUser from;
     @Column(length = 4096)
     private String text;
+    private String fileId;
     private boolean done;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "answer_for_id")

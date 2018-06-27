@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 
@@ -91,10 +92,29 @@ public class SendService {
                     "<code>" + getText + "</code>\n" +
                     "<b>Автор: " + botMessage.getFrom().getUserName() + "</b>";
 
+            if (botMessage.getFileId() != null) {
+                SendPhoto message = createPhotoMessage(receiveMessage, botMessage.getFileId(), botMessage.getId());
+                letsCodeBot.sendImage(message);
+            }
             SendMessage sendMessage = createMessageBody(receiveMessage, botText);
             keyboardReply.addOpenButton(sendMessage, isAnswer);
             letsCodeBot.send(sendMessage);
         }
+    }
+
+    /**
+     * Сетод создает тело сообщения для отправки, содержит в себе файл изображения.
+     *
+     * @param receiveMessage - принятое сообщение
+     * @param fileId         - имя файла
+     * @param id             - Id вопроса.
+     * @return
+     */
+    private SendPhoto createPhotoMessage(Message receiveMessage, String fileId, Integer id) {
+        return new SendPhoto()
+                .setChatId(receiveMessage.getChatId())
+                .setCaption("Вопрос #" + id)
+                .setPhoto(fileId);
     }
 
     /**
