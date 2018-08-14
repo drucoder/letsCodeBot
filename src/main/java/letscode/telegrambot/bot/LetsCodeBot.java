@@ -1,6 +1,5 @@
 package letscode.telegrambot.bot;
 
-import letscode.telegrambot.config.KeyboardReply;
 import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.Buttons;
 import letscode.telegrambot.service.ButtonService;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
@@ -25,17 +25,14 @@ public class LetsCodeBot extends TelegramLongPollingBot {
     private static final String BOT_NAME = "BOT_NAME";
 
     private final MessageService messageService;
-    private final KeyboardReply keyboardReply;
     private final ButtonService buttonService;
     private final SendService sendService;
 
     @Autowired
     public LetsCodeBot(MessageService messageService,
-                       KeyboardReply keyboardReply,
                        ButtonService buttonService,
                        SendService sendService) {
         this.messageService = messageService;
-        this.keyboardReply = keyboardReply;
         this.buttonService = buttonService;
         this.sendService = sendService;
     }
@@ -58,8 +55,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
                         "Привет, " + receiveMessage.getFrom().getFirstName() + "!!!"));
             }
 
-            boolean isBottomButtonsPressed = Buttons    //Проверяем приходящее сообщение является ли это командой с кнопки.
-                    .get(receiveMessage.getText()) != null &&
+            boolean isBottomButtonsPressed = Buttons.of(receiveMessage.getText()) != null &&
                     !update.hasCallbackQuery();
 
             if (isBottomButtonsPressed) {
@@ -86,7 +82,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             message = new EditMessageText()
                     .setMessageId(Math.toIntExact(botMessage.getId()))
                     .setChatId(botMessage.getChat().getId())
-                    .setText(botMessage.getText());
+                    .setText(botMessage.getMessageText());
         } else if (update.hasCallbackQuery()) { //Проверяем является ли сообщение InlineKeyboardReply командой
 
             buttonService.executeCommand(update);
@@ -105,8 +101,14 @@ public class LetsCodeBot extends TelegramLongPollingBot {
                 messageService.saveOutgoing(resultMessage, botMessage);
             }
         }
-    }
 
+        boolean imageQuestions = (update.getMessage().getPhoto() != null    //проверяем содержит ли вопрос пикчу.
+                && update.getMessage().getCaption().startsWith("?"));
+
+        if (imageQuestions) {
+            messageService.saveIncoming(update.getMessage());
+        }
+    }
 
     /**
      * Отправляем сообщения
@@ -119,6 +121,14 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             execute(sendMessage); // Call method to send the message
         } catch (TelegramApiException e) {
             log.error("Some shit happens during message sending :(", e);
+        }
+    }
+
+    public void sendImage(SendPhoto msg) {
+        try {
+            sendPhoto(msg);
+        } catch (TelegramApiException e) {
+            log.error("Some shit happens during sending image message:(", e + ")");
         }
     }
 

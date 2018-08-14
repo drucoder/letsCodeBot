@@ -88,7 +88,10 @@ public class KeyboardReply {
      * @param enableAnswer  - если переменная true, добавляет кнопку посмотреть ответы на вопрос.
      * @param enableLikeDis - добавляем кнопки Like-Dislike
      */
-    public void addTwoLineKeyboard(SendMessage sendMessage, boolean isAuthor, boolean enableAnswer, boolean enableLikeDis) {
+    public void addTwoLineKeyboard(SendMessage sendMessage,
+                                   boolean isAuthor,
+                                   boolean enableAnswer,
+                                   boolean enableLikeDis) {
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 
@@ -69,16 +70,17 @@ public class SendService {
      * @param isAnswer       - так как этот метод используется для вывода сообщений вопросов и ответов,
      *                       то при формировании шапки, и кнопок используется эта булевая переменная
      */
-    public void sendMessageList
-    (Message receiveMessage, List<BotMessage> botMessageList, boolean isAnswer) {
-        String getText, title, botText;
+    public void sendMessageList(Message receiveMessage,
+                                List<BotMessage> botMessageList,
+                                boolean isAnswer) {
+        String messageText, title, botText;
 
         for (BotMessage botMessage : botMessageList) {        //пробегаемся по списку botMessageList
 
-            if (botMessage.getText().length() > 50) {       // если сообщение длиннее 50 символов режем его
-                getText = botMessage.getText().substring(0, 50);
+            if (botMessage.getMessageText().length() > 50) {       // если сообщение длиннее 50 символов режем его
+                messageText = botMessage.getMessageText().substring(0, 50) + "...";
             } else {
-                getText = botMessage.getText();
+                messageText = botMessage.getMessageText();
             }
 
             if (!isAnswer) {                                        //определяем, вопрос это или ответ.
@@ -88,13 +90,34 @@ public class SendService {
             }
 
             botText = title +
-                    "<code>" + getText + "</code>\n" +
+                    "<code>" + messageText + "</code>\n" +
                     "<b>Автор: " + botMessage.getFrom().getUserName() + "</b>";
 
+            if (botMessage.getFileId() != null) {
+                SendPhoto message = createPhotoMessage(receiveMessage, botMessage.getFileId(), botMessage.getId());
+                letsCodeBot.sendImage(message);
+            }
             SendMessage sendMessage = createMessageBody(receiveMessage, botText);
             keyboardReply.addOpenButton(sendMessage, isAnswer);
             letsCodeBot.send(sendMessage);
         }
+    }
+
+    /**
+     * Сетод создает тело сообщения для отправки, содержит в себе файл изображения.
+     *
+     * @param receiveMessage - принятое сообщение
+     * @param fileId         - имя файла
+     * @param id             - Id вопроса.
+     * @return
+     */
+    private SendPhoto createPhotoMessage(Message receiveMessage,
+                                         String fileId,
+                                         Integer id) {
+        return new SendPhoto()
+                .setChatId(receiveMessage.getChatId())
+                .setCaption("Вопрос #" + id)
+                .setPhoto(fileId);
     }
 
     /**
@@ -105,11 +128,10 @@ public class SendService {
      * @param count         - счетчик ответов.
      * @param isAnswer
      */
-    public void openMessage(
-            BotMessage botMessage,
-            CallbackQuery callbackQuery,
-            long count,
-            boolean isAnswer) {
+    public void openMessage(BotMessage botMessage,
+                            CallbackQuery callbackQuery,
+                            long count,
+                            boolean isAnswer) {
         String botText, title;
 
         boolean enableAnswer = count > 0;    // проверка, есть ли ответы на текущий вопрос.
@@ -130,11 +152,11 @@ public class SendService {
 
         if (enableAnswer) {
             botText = title +
-                    "<code>" + botMessage.getText() + "</code>\n" +
+                    "<code>" + botMessage.getMessageText() + "</code>\n" +
                     "<b>Автор: " + botMessage.getFrom().getUserName() + "    \uD83D\uDCAC: " + count + "</b>";
         } else {
             botText = title +
-                    "<code>" + botMessage.getText() + "</code>\n" +
+                    "<code>" + botMessage.getMessageText() + "</code>\n" +
                     "<b>Автор: " + botMessage.getFrom().getUserName() + "</b>";
         }
 
@@ -159,7 +181,7 @@ public class SendService {
             if (count > 0) {  //отображаем только закрытые с ответами
 
                 title = "<b>Вопрос #" + botMessage.getId() + ":</b>\n"; //шапка сообщения
-                body = "<code>" + botMessage.getText() + "</code>\n";   //тело
+                body = "<code>" + botMessage.getMessageText() + "</code>\n";   //тело
                 footer = "<em>Автор вопроса: " + botMessage.getFrom().getUserName() + "</em>\n" +
                         "<em>Ответов: " + count + "</em>\n";    //нижняя часть
 
