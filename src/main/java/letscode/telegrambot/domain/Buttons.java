@@ -19,7 +19,7 @@ public enum Buttons {
     private final String buttonCommands;
 
 
-    public static Buttons get(String buttonComands) {
+    public static Buttons of(String buttonComands) {
         for (Buttons c : Buttons.values()) {
             if (buttonComands.equals(c.getButtonCommands())) {
                 return c;

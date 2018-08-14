@@ -55,8 +55,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
                         "Привет, " + receiveMessage.getFrom().getFirstName() + "!!!"));
             }
 
-            boolean isBottomButtonsPressed = Buttons    //Проверяем приходящее сообщение является ли это командой с кнопки.
-                    .get(receiveMessage.getText()) != null &&
+            boolean isBottomButtonsPressed = Buttons.of(receiveMessage.getText()) != null &&
                     !update.hasCallbackQuery();
 
             if (isBottomButtonsPressed) {
@@ -83,7 +82,7 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             message = new EditMessageText()
                     .setMessageId(Math.toIntExact(botMessage.getId()))
                     .setChatId(botMessage.getChat().getId())
-                    .setText(botMessage.getText());
+                    .setText(botMessage.getMessageText());
         } else if (update.hasCallbackQuery()) { //Проверяем является ли сообщение InlineKeyboardReply командой
 
             buttonService.executeCommand(update);

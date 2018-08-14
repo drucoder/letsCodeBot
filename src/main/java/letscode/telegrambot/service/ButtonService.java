@@ -59,7 +59,7 @@ public class ButtonService {
             message = update.getMessage();                  //и сообщения
         }
 
-        Buttons button = Buttons.get(receiveCommand);
+        Buttons button = Buttons.of(receiveCommand);
         Optional<BotMessage> botMessage;
         if (button != null) {
             switch (button) {
@@ -110,8 +110,8 @@ public class ButtonService {
                             ).get()
                     );
                     sendService.sendMessage(message,
-                            "Ваш вопрос закрыт, не забудьте отблагадорить тех, " +
-                                    "кто принимал участие в решении вашей проблемы");
+                            "Твой вопрос закрыт, не забудь отблагадорить тех, " +
+                                    "кто принимал участие в решении твоей проблемы");
                     break;
 
                 case GET_ANSWER_LIST:   //Обрабатываем callBackQuerry - список ответов

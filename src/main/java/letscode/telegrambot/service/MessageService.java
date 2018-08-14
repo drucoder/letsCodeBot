@@ -57,14 +57,14 @@ public class MessageService {
 
         if (!isReply) {
             if (!enableImage) {
-                botMessage.setText(message.getText().substring(1)); // если сообщение не Ответ то записываем его как вопрос предварительно вырезав тэг знака вопроса
+                botMessage.setMessageText(message.getText().substring(1)); // если сообщение не Ответ то записываем его как вопрос предварительно вырезав тэг знака вопроса
             } else {    //Сохраняем в файл ID изображения если вопрос был с пикчей.
                 List<PhotoSize> photo = message.getPhoto();
                 String fileId = photo.stream()
                         .sorted(Comparator.comparing(PhotoSize::getFileSize).reversed())
                         .findFirst()
                         .orElse(null).getFileId();
-                botMessage.setText(message.getText().substring(1));
+                botMessage.setMessageText(message.getText().substring(1));
                 botMessage.setFileId(fileId);
             }
         } else {    //если сообщение getReplyToMessage()
@@ -89,7 +89,7 @@ public class MessageService {
         BotMessage botMessage = new BotMessage();
 
         botMessage.setId(message.getMessageId());
-        botMessage.setText(message.getText());
+        botMessage.setMessageText(message.getText());
         botMessage.setChat(botChat);
         botMessage.setFrom(botUser);
         return botMessage;
@@ -108,8 +108,8 @@ public class MessageService {
 
         BotMessage answer = messageRepo.findByAnswerForId(update.getEditedMessage().getMessageId());
 
-        answer.setText(messageText);
-        answer.getAnswerFor().setText(messageText);
+        answer.setMessageText(messageText);
+        answer.getAnswerFor().setMessageText(messageText);
 
         return messageRepo.save(answer);
     }
