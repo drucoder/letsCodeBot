@@ -133,7 +133,6 @@ public class LetsCodeBot extends TelegramLongPollingBot {
         }
     }
 
-
     /**
      * Отправляем сообщения
      *
