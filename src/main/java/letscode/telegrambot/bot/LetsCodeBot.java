@@ -1,5 +1,6 @@
 package letscode.telegrambot.bot;
 
+import letscode.telegrambot.config.KeyboardReply;
 import letscode.telegrambot.domain.BotMessage;
 import letscode.telegrambot.domain.Buttons;
 import letscode.telegrambot.service.ButtonService;
@@ -129,6 +130,21 @@ public class LetsCodeBot extends TelegramLongPollingBot {
             sendPhoto(msg);
         } catch (TelegramApiException e) {
             log.error("Some shit happens during sending image message:(", e + ")");
+        }
+    }
+
+
+    /**
+     * Отправляем сообщения
+     *
+     * @param sendMessage
+     */
+    public void send(SendMessage sendMessage) {
+
+        try {
+            execute(sendMessage); // Call method to send the message
+        } catch (TelegramApiException e) {
+            log.error("Some shit happens during message sending :(", e);
         }
     }
 
